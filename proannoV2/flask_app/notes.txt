@@ -1,0 +1,43 @@
+
+# Network Interface and IP Addresses:
+
+    1.  each device connected to a network (like this workstation or the machine running ProAnno) has one or more
+        network interfaces. these can be either physical (like Ethernet) or virtual like Wi-Fi.
+    2.  each network interface is assigned to an IP address, which is used to identify the device on the network
+
+
+# Accessing Flask Server on the Network
+
+    -   Flask running on '0.0.0.0' means that it listens for incoming connecting on port 5000 on all network interfaces
+        of the host machine. it doesn't mean the Flask server is accessible on the IP '0.0.0.0', but rather at the IP
+        address assigned to the host machine on our network.
+    
+    -   to access this Flask server from the ProAnno tool running on a different machine, we should use the IP address of
+        the machine where the Flask app is running, followed by the port number.
+
+        for example, if the IP address of the workstation is 192.168.1.5 and the Flask server is running on port 5000,
+        then from the ProAnno tool on another machine we would access the Flask app using 'http://192.168.1.5:5000'
+
+
+# Triggering a Python Script from Another Machine
+
+    1.  Determine the workstation's IP address: the IP address where the Flask server is running.
+        this IP address will be used by ProAnno to send the request.
+    
+    2.  send an HTTP request from ProAnno: in ProAnno we need to add a functionality to send an HTTP request to
+        the Flask server running on the workstation. we can use Python's 'requests' library for this purpose.
+
+
+
+# Send a frame ID from ProAnno and return an array from Workstation #TODO
+
+
+# you need to have the same conda environment running in both the docker container and in the flask app
+
+    - inside the docker container -->   conda env export > environment.yml
+    - copy the environment.yaml to the folder with flask_app.py
+    - if you want to change the conda env name --> open environment.yaml and modify the old conda env name
+    - in the terminal inside the flask_app folder --> conda env create -f environment.yaml
+    - conda activate <env name>
+
+
