@@ -1,20 +1,17 @@
+import argparse
 import json
 import os
-import shutil
-
 from pypcd import pypcd
 from glob import glob
-from typing import Any, Dict, List
-from tqdm import tqdm 
-
-import pickle
+from typing import Dict, List
+from tqdm import tqdm
 import numpy as np
-import open3d as o3d
-
 from scipy.spatial.transform import Rotation
-
-# from pcdet.datasets.tumtraf.tumtraf_utils import *
 from pcdet.utils import common_utils
+
+# Example usage:
+# python tumtraf_converter.py --load_dir /home/user/Downloads/tumtraf --save_dir /home/user/Downloads/tumtraf_kitti --splits train val test
+
 
 lidar2ego = np.asarray(
     [
@@ -25,6 +22,7 @@ lidar2ego = np.asarray(
     ],
     dtype=np.float32,
 )[:-1, :]
+
 
 class TUMTraf2KITTI:
     def __init__(self, load_dir, save_dir, splits: List[str], logger=None):
@@ -38,7 +36,7 @@ class TUMTraf2KITTI:
         self.map_split_to_dir_idx = {"training": 0, "validation": 1, "testing": 2}
 
         self.occlusion_map = {"NOT_OCCLUDED": 0, "PARTIALLY_OCCLUDED": 1, "MOSTLY_OCCLUDED": 2}
-    
+
     def convert(self) -> None:
         self.logger.info("TUMTraf Conversion - start")
         for split in self.splits:
@@ -47,19 +45,19 @@ class TUMTraf2KITTI:
             split_source_path = os.path.join(self.load_dir, split)
             self.create_folder(split)
 
-            pcd_list = sorted(glob(os.path.join(split_source_path, 
-                                                'point_clouds', 
+            pcd_list = sorted(glob(os.path.join(split_source_path,
+                                                'point_clouds',
                                                 's110_lidar_ouster_south_and_north_registered', '*')))
-            pcd_labels_list = sorted(glob(os.path.join(split_source_path, 
-                                                       'annotations', 
+            pcd_labels_list = sorted(glob(os.path.join(split_source_path,
+                                                       'annotations',
                                                        's110_lidar_ouster_south_and_north_registered', '*')))
-            
+
             for idx, (pcd_path, pcd_label_path) in tqdm(enumerate(zip(pcd_list, pcd_labels_list))):
                 out_pcd = pcd_path.split("/")[-1][:-4]
                 out_label = pcd_label_path.split("/")[-1][:-5]
 
                 self.convert_pcd_to_bin(
-                    file=pcd_path, 
+                    file=pcd_path,
                     out_file=os.path.join(self.point_cloud_save_dir, out_pcd)
                 )
                 pcd_list[idx] = os.path.join(self.point_cloud_save_dir, out_pcd) + ".bin"
@@ -82,14 +80,15 @@ class TUMTraf2KITTI:
         np_x = np.array(point_cloud.pc_data["x"], dtype=np.float32)
         np_y = np.array(point_cloud.pc_data["y"], dtype=np.float32)
         np_z = np.array(point_cloud.pc_data["z"], dtype=np.float32)
-        np_i = np.array(point_cloud.pc_data["intensity"], dtype=np.float32) # They are already normalized, check the min and max values
+        np_i = np.array(point_cloud.pc_data["intensity"],
+                        dtype=np.float32)  # They are already normalized, check the min and max values
         # np_ts = np.zeros((np_x.shape[0],), dtype=np.float32)
 
         bin_format = np.column_stack((np_x, np_y, np_z, np_i)).flatten()
         bin_format.tofile(os.path.join(f"{out_file}.bin"))
 
     def convert_label2kitti(self, file: str, out_file: str) -> None:
-        
+
         trunc = -1
         occ = -1
         alpha = -1
@@ -97,10 +96,10 @@ class TUMTraf2KITTI:
 
         with open(file, 'r') as f:
             data = json.load(f)
-        
+
         labels = []
         for frame_idx, frame_obj in data["openlabel"]["frames"].items():
-            for obj_id, obj in  frame_obj["objects"].items():
+            for obj_id, obj in frame_obj["objects"].items():
                 obj_data = obj["object_data"]
 
                 obj_type = obj_data["type"]
@@ -117,13 +116,13 @@ class TUMTraf2KITTI:
                 label = [obj_type, trunc, occ, alpha, height, width, length, loc_x, loc_y, loc_z, yaw, score]
 
                 labels.append(label)
-            
+
             with open(out_file + '.txt', 'w') as f:
-                    for label in labels:
-                        for val in label:
-                            f.write(str(val) + ' ')
-                        f.write('\n')
-    
+                for label in labels:
+                    for val in label:
+                        f.write(str(val) + ' ')
+                    f.write('\n')
+
     def create_folder(self, split: str) -> None:
         """
         Create folder for data preprocessing.
@@ -132,7 +131,7 @@ class TUMTraf2KITTI:
         self.logger.info(f"Creating folder - split_path: {split_path}")
         pcd_dir = "point_clouds/s110_lidar_ouster_south_and_north_registered"
         label_dir = "annotations/s110_lidar_ouster_south_and_north_registered"
-        
+
         self.point_cloud_save_dir = os.path.join(self.save_dir, split_path, pcd_dir)
         self.label_save_dir = os.path.join(self.save_dir, split_path, label_dir)
 
@@ -155,7 +154,7 @@ class TUMTraf2KITTI_v2:
         self.map_split_to_dir_idx = {"training": 0, "validation": 1, "testing": 2}
 
         self.occlusion_map = {"NOT_OCCLUDED": 0, "PARTIALLY_OCCLUDED": 1, "MOSTLY_OCCLUDED": 2}
-    
+
     def convert_label_file(self, label_file):
         trunc = -1
         occ = -1
@@ -164,10 +163,10 @@ class TUMTraf2KITTI_v2:
 
         with open(label_file, 'r') as f:
             data = json.load(f)
-        
+
         labels = []
         for frame_idx, frame_obj in data["openlabel"]["frames"].items():
-            for obj_id, obj in  frame_obj["objects"].items():
+            for obj_id, obj in frame_obj["objects"].items():
                 obj_data = obj["object_data"]
 
                 obj_type = obj_data["type"]
@@ -197,12 +196,11 @@ class TUMTraf2KITTI_v2:
             pcd_labels_list = self.pcd_labels_dict[split]
 
             for idx, (pcd_path, pcd_label_path) in tqdm(enumerate(zip(pcd_list, pcd_labels_list))):
-
                 out_pcd = '_'.join(pcd_path.split("/")[-1][:-4].split('_')[:2])
                 out_label = '_'.join(pcd_label_path.split("/")[-1][:-5].split('_')[:2])
-                    
+
                 self.convert_pcd_to_bin(
-                    file=pcd_path, 
+                    file=pcd_path,
                     out_file=os.path.join(self.point_cloud_save_dir, out_pcd)
                 )
                 pcd_list[idx] = os.path.join(self.point_cloud_save_dir, out_pcd) + ".bin"
@@ -225,14 +223,15 @@ class TUMTraf2KITTI_v2:
         np_x = np.array(point_cloud.pc_data["x"], dtype=np.float32)
         np_y = np.array(point_cloud.pc_data["y"], dtype=np.float32)
         np_z = np.array(point_cloud.pc_data["z"], dtype=np.float32)
-        np_i = np.array(point_cloud.pc_data["intensity"], dtype=np.float32) # They are already normalized, check the min and max values
+        np_i = np.array(point_cloud.pc_data["intensity"],
+                        dtype=np.float32)  # They are already normalized, check the min and max values
         # np_ts = np.zeros((np_x.shape[0],), dtype=np.float32)
 
         bin_format = np.column_stack((np_x, np_y, np_z, np_i)).flatten()
         bin_format.tofile(os.path.join(f"{out_file}.bin"))
 
     def convert_label2kitti(self, file: str, out_file: str) -> None:
-        
+
         trunc = -1
         occ = -1
         alpha = -1
@@ -240,10 +239,10 @@ class TUMTraf2KITTI_v2:
 
         with open(file, 'r') as f:
             data = json.load(f)
-        
+
         labels = []
         for frame_idx, frame_obj in data["openlabel"]["frames"].items():
-            for obj_id, obj in  frame_obj["objects"].items():
+            for obj_id, obj in frame_obj["objects"].items():
                 obj_data = obj["object_data"]
 
                 obj_type = obj_data["type"]
@@ -260,13 +259,13 @@ class TUMTraf2KITTI_v2:
                 label = [obj_type, trunc, occ, alpha, height, width, length, loc_x, loc_y, loc_z, yaw, score]
 
                 labels.append(label)
-            
+
             with open(out_file + '.txt', 'w') as f:
-                    for label in labels:
-                        for val in label:
-                            f.write(str(val) + ' ')
-                        f.write('\n')
-    
+                for label in labels:
+                    for val in label:
+                        f.write(str(val) + ' ')
+                    f.write('\n')
+
     def create_folder(self, split: str) -> None:
         """
         Create folder for data preprocessing.
@@ -275,7 +274,7 @@ class TUMTraf2KITTI_v2:
         self.logger.info(f"Creating folder - split_path: {split_path}")
         pcd_dir = "point_clouds/s110_lidar_ouster_south_and_north_registered"
         label_dir = "annotations/s110_lidar_ouster_south_and_north_registered"
-        
+
         self.point_cloud_save_dir = os.path.join(self.save_dir, split_path, pcd_dir)
         self.label_save_dir = os.path.join(self.save_dir, split_path, label_dir)
 
@@ -283,12 +282,39 @@ class TUMTraf2KITTI_v2:
         os.makedirs(self.point_cloud_save_dir, exist_ok=True, mode=0o777)
         os.makedirs(self.label_save_dir, exist_ok=True, mode=0o777)
 
+
 if __name__ == "__main__":
     logger = common_utils.create_logger()
+
+    argparser = argparse.ArgumentParser(description="TUMTraf to KITTI format")
+    argparser.add_argument(
+        "--load_dir",
+        type=str,
+        required=True,
+        help="Path to the TUMTraf dataset containing the train/val/test split, e.g. /home/user/tumtraf/OpenLABEL/stratified",
+    )
+    argparser.add_argument(
+        "--save_dir",
+        type=str,
+        required=True,
+        help="Path to save the converted dataset, e.g. /home/user/tumtraf_kitti_format",
+    )
+    argparser.add_argument(
+        "--splits",
+        type=str,
+        nargs='+',
+        required=True,
+        help="List of splits to convert. e.g. [train, test, val]",
+    )
+    args = argparser.parse_args()
+    load_dir = args.load_dir
+    save_dir = args.save_dir
+    splits = args.splits
+
     converter = TUMTraf2KITTI(
-        load_dir='/ahmed/data/tumtraf/OpenLABEL/stratified',
-        save_dir='/ahmed/data/tumtraf/tumtraf_kitti_format',
-        splits=['train', 'test', 'val'],
-        logger=logger   
+        load_dir=load_dir,
+        save_dir=save_dir,
+        splits=splits,
+        logger=logger
     )
     converter.convert()

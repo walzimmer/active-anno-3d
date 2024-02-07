@@ -1,6 +1,6 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2402.03235-a2ad00.svg)](https://arxiv.org/pdf/2402.03235.pdf)
 [![tum_traffic](https://img.shields.io/badge/download-TUM_Traffic_Intersection_Dataset-005eb8.svg)](https://innovation-mobility.com/tumtraf-dataset)
-[![website](https://img.shields.io/badge/paper-website-e37222.svg)](https://innovation-mobility.com/tumtraf-dataset)
+[![website](https://img.shields.io/badge/paper-website-e37222.svg)](https://active3d-framework.github.io/active3d-framework/)
 
 # ActiveAnno3D - An Active Learning Framework for Multi-Modal 3D Object Detection
 
@@ -75,17 +75,11 @@ The code is tested in the following python environment:
 
 ## Tutorial
 
-The dataset has to be in the KITTI format. If it's in OpenLABEL format then use
+The dataset, e.g. [TUM Traffic Intersection](https://innovation-mobility.com/tumtraf-dataset), has to be in the KITTI format. If it's in OpenLABEL format then use
 our [converter](./pcdet/datasets/tumtraf/tumtraf_converter.py)
 
 ```
-converter = TUMTraf2KITTI(
-        load_dir=<ROOT_DIR>,
-        save_dir=<DEST_DIR>,
-        splits=<SPLITS>,
-        logger=<LOGGER>   
-    )
-converter.convert()
+python tumtraf_converter.py --load_dir /home/user/tumtraf --save_dir /home/user/tumtraf_kitti_format --splits train val test
 ```
 
 To run normal training:
