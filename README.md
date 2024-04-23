@@ -7,11 +7,9 @@
 ![figure](img/title_figure.jpg)
 : We propose a framework for efficient active learning within various 3D object detection techniques and modalities,
 demonstrating the effectiveness of active learning at reaching comparable detection performance on benchmark datasets at
-a
-fraction of the annotation cost. Datasets include roadside infrastructure sensors (top row) and onboard vehicle
-sensors (bottom
-row), with LiDAR-only and LiDAR+camera fusion methods, the two dominant strategies in state-of-the-art performance at
-the safety-critical detection task.
+a fraction of the annotation cost. Datasets include roadside infrastructure sensors (top row) and onboard vehicle
+sensors (bottom row), with LiDAR-only and LiDAR+camera fusion methods, the two dominant strategies in state-of-the-art performance at
+the safety-critical detection task. We use the entropy active learning sampling strategy to select the most informative data.
 
 This is the official implementation of our paper:
 
@@ -32,7 +30,7 @@ In summary:
 3. We show that we can achieve almost the same performance with <b>PV-RCNN</b> and the <i>entropy-based</i> query
    strategy when using only half of the training data (<b>77.25 mAP</b> compared to <b>83.50 mAP</b>) of the <b>TUM
    Traffic Intersection</b> dataset.
-4. <b>BEVFusion</b> achieved an <b>mAP of 64.31</b> when using half of the training data and <b>75.0 mAP</b> when using
+4. <b>BEVFusion</b> achieved an <b>mAP of 64.31</b> when using half of the training data and <b>77.25 mAP</b> when using
    the complete <b>nuScenes</b> dataset.
 5. We integrate our active learning framework into the <b>proAnno</b> labeling tool to enable AI-assisted data selection
    and labeling and minimize the labeling costs.
@@ -193,9 +191,9 @@ complete dataset. Both results are quite similar, showing the efficiency of the 
     <tr>
         <td>5</td>
         <td>30</td>
-        <td>77.25</td>
+        <td><u>77.25</u></td>
         <td><u>76.56</u> <p style="display:inline;color:red;font-size:80%;">(-0.69)</p></td>
-        <td><strong>44.94</strong></td>
+        <td>44.94</td>
         <td>45.57 <p style="display:inline;color:forestgreen;font-size:80%;">(+0.63)</p></td>
     </tr>
     <tr>
@@ -203,15 +201,15 @@ complete dataset. Both results are quite similar, showing the efficiency of the 
         <td>35</td>
         <td>75.40</td>
         <td>75.00 <p style="display:inline;color:red;font-size:80%;">(-0.40)</p></td>
-        <td><u>44.74</u></td>
+        <td>44.74</td>
         <td>46.76 <p style="display:inline;color:forestgreen;font-size:80%;">(+2.02)</p></td>
     </tr>
     <tr>
         <td>7</td>
         <td>40</td>
-        <td><u>77.03</u></td>
+        <td>77.03</td>
         <td>75.48 <p style="display:inline;color:red;font-size:80%;">(-1.55)</p></td>
-        <td>-</td>
+        <td><u>46.93</u></td>
         <td><u>49.24</u></td>
     </tr>
     <tr>
@@ -219,14 +217,14 @@ complete dataset. Both results are quite similar, showing the efficiency of the 
         <td>50</td>
         <td><strong>79.09</strong></td>
         <td><strong>77.25</strong> <p style="display:inline;color:red;font-size:80%;">(-1.84)</p></td>
-        <td>-</td>
+        <td><strong>49.90</strong></td>
         <td><strong>64.31</strong></td>
     </tr>
     <tr bgcolor="lightgray">
         <td><strong>SOA (No AL)</strong></td>
         <td><strong>100</strong></td>
         <td colspan="2" style="text-align: center"><strong>83.50</strong></td>
-        <td colspan="2" style="text-align: center"><strong>75.00</strong></td>
+        <td colspan="2" style="text-align: center"><strong>52.88</strong></td>
     </tr>
 </table>
 </center>
@@ -236,8 +234,14 @@ Evaluation of the PV-RCNN (LiDAR-only) and BEVFusion (camera+LiDAR) model using 
 
 Our baseline is the Active3D framework [Active3D](https://github.com/Luoyadan/CRB-active-3Ddet/tree/main), an active
 learning framework for 3D object detection, proposing the CRB query strategy that assesses the point cloud data
-informativeness based on 3 data characteristics: 3D box class distribution, feature representativeness, and point
-density distribution.
+informativeness based on three data characteristics: 3D box class distribution, feature representativeness, and point
+density distribution. This research was supported by the Federal Ministry of Education and Research in Germany within the
+AUTOtech.agil project (01IS22088U). The publication was partly written at Virtual Vehicle Research GmbH in Graz,
+Austria. The authors acknowledge the financial support within the COMET K2 Competence Centers for Excellent
+Technologies from the Austrian Federal Ministry for Climate Action (BMK), the Austrian Federal Ministry for Labour and
+Economy (BMAW), the Province of Styria (Dept. 12) and the Styrian Business Promotion Agency (SFG). The Austrian
+Research Promotion Agency (FFG) has been authorized for the program management. The authors thank Qualcomm for
+the support of the Qualcomm Innovation Fellowship.
 
 ## Citation
 
